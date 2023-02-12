@@ -1,0 +1,15 @@
+{
+  "type": "record",
+  "name": "ShopNameChangedEvent",
+  "namespace": "wadcorp.catchtable.event",
+  "fields": [
+    {
+      "name": "shop_id",
+      "type": "int"
+    },
+    {
+      "name": "shop_name",
+      "type": "string"
+    }
+  ]
+}
