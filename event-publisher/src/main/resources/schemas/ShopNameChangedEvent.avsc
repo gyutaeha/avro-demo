@@ -1,14 +1,14 @@
 {
   "type": "record",
   "name": "ShopNameChangedEvent",
-  "namespace": "wadcorp.catchtable.event",
+  "namespace": "co.wadcorp.catchtable.event",
   "fields": [
     {
       "name": "shop_id",
       "type": "int"
     },
     {
-      "name": "shop_name",
+      "name": "shop_name2",
       "type": "string"
     }
   ]

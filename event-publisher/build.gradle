@@ -1,0 +1,78 @@
+plugins {
+    id 'java'
+    id 'com.github.davidmc24.gradle.plugin.avro' version '1.6.0'
+    id 'com.github.davidmc24.gradle.plugin.avro-base' version '1.6.0'
+    id "net.croz.apicurio-registry-gradle-plugin" version "1.1.0"
+}
+
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
+group 'co.wadcorp.catchtable.event'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+// https://github.com/croz-ltd/apicurio-registry-gradle-plugin
+// https://plugins.gradle.org/plugin/net.croz.apicurio-registry-gradle-plugin
+schemaRegistry {
+    config {
+        url("http://localhost:8080")
+    }
+
+    register {
+        // https://github.com/croz-ltd/apicurio-registry-gradle-plugin/blob/main/plugin/src/testFixtures/groovy/net/croz/apicurio/core/model/RegisterArtifact.groovy
+        artifacts {
+            artifact {
+                groupId = "co.wadcorp.catchtable.event"
+                id = "shop_name_changed_event"
+                name = "ShopNameChangedEvent"
+                type = "AVRO"
+                path = "src/main/resources/schemas/ShopNameChangedEvent.avsc"
+                description = "Shop name changed event"
+                conflictHandleType = "RETURN_OR_UPDATE"
+            }
+            artifact {
+                groupId = "co.wadcorp.catchtable.event"
+                id = "shop_contact_changed_event"
+                name = "ShopContactChangedEvent"
+                type = "AVRO"
+                path = "src/main/resources/schemas/ShopContactChangedEvent.avsc"
+                description = "Shop contact changed event"
+                conflictHandleType = "RETURN_OR_UPDATE"
+            }
+        }
+    }
+}
+
+schemaRegistryRegister {
+}
+
+// https://github.com/davidmc24/gradle-avro-plugin
+avro {
+    createSetters = false
+    createOptionalGetters = true
+    fieldVisibility = 'PRIVATE'
+    outputCharacterEncoding = 'UTF-8'
+    stringType = 'String'
+}
+
+tasks.register("generateAvro", GenerateAvroJavaTask) {
+    dependsOn(schemaRegistryDownload)
+    source("src/main/resources/schemas")
+    outputDir = file("src/main/java")
+}
+
+generateAvro {
+
+}

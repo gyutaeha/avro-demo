@@ -1,0 +1,78 @@
+plugins {
+    id 'java'
+    id 'com.github.davidmc24.gradle.plugin.avro' version '1.6.0'
+    id 'com.github.davidmc24.gradle.plugin.avro-base' version '1.6.0'
+    id 'net.croz.apicurio-registry-gradle-plugin' version '1.1.0'
+}
+
+import com.github.davidmc24.gradle.plugin.avro.GenerateAvroJavaTask
+
+group 'co.wadcorp.catchtable.event'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    implementation "org.apache.avro:avro:1.11.0"
+
+    testImplementation 'org.junit.jupiter:junit-jupiter-api:5.8.1'
+    testRuntimeOnly 'org.junit.jupiter:junit-jupiter-engine:5.8.1'
+}
+
+test {
+    useJUnitPlatform()
+}
+
+def eventClassPath = 'schema/event'
+
+// https://github.com/croz-ltd/apicurio-registry-gradle-plugin
+// https://plugins.gradle.org/plugin/net.croz.apicurio-registry-gradle-plugin
+schemaRegistry {
+    config {
+        url("http://localhost:8080")
+    }
+
+    download {
+        // https://github.com/croz-ltd/apicurio-registry-gradle-plugin/blob/main/plugin/src/main/kotlin/net/croz/apicurio/model/Artifact.kt
+        // https://github.com/croz-ltd/apicurio-registry-gradle-plugin/blob/main/plugin/src/main/kotlin/net/croz/apicurio/model/DownloadArtifact.kt
+        artifacts {
+            artifact {
+                groupId = 'co.wadcorp.catchtable.event'
+                id = 'shop_name_changed_event'
+                version = '1'
+                outputPath = "${buildDir}/${eventClassPath}"
+            }
+            artifact {
+                groupId = 'co.wadcorp.catchtable.event'
+                id = 'shop_contact_changed_event'
+                version = '1'
+                outputPath = "${buildDir}/${eventClassPath}"
+            }
+        }
+    }
+}
+
+schemaRegistryDownload {
+
+}
+
+// https://github.com/davidmc24/gradle-avro-plugin
+avro {
+    createSetters = false
+    createOptionalGetters = true
+    fieldVisibility = 'PRIVATE'
+    outputCharacterEncoding = 'UTF-8'
+    stringType = 'String'
+}
+
+tasks.register("generateAvro", GenerateAvroJavaTask) {
+    dependsOn(schemaRegistryDownload)
+    source("build/schema/event")
+    outputDir = file("src/main/java")
+}
+
+generateAvro {
+
+}
